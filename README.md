@@ -288,9 +288,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Related Projects
 
-- [Model Context Protocol](https://modelcontextprotocol.io/) - The MCP specification
-- [Alteryx Server API](https://help.alteryx.com/current/en/server/api-overview/alteryx-server-api-v3.html) - Official Alteryx Server documentation
-- [Claude Desktop](https://claude.ai/download) - Claude Desktop application
+- <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer">Model Context Protocol</a> - The MCP specification
+- <a href="https://help.alteryx.com/current/en/server/api-overview/alteryx-server-api-v3.html" target="_blank" rel="noopener noreferrer">Alteryx Server API</a> - Official Alteryx Server documentation
+- <a href="https://claude.ai/download" target="_blank" rel="noopener noreferrer">Claude Desktop</a> - Claude Desktop application
 
 ---
 
