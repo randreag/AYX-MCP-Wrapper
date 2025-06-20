@@ -1,6 +1,6 @@
 [project]
 name = "mcp-server-alteryx"
-version = "0.2.1"
+version = "0.2.2"
 description = "Model Context Protocol (MCP) server for Alteryx Server"
 authors = [
     { name = "Jupiter Bakakeu", email = "jupiter.bakakeu@gmail.com" }
@@ -18,8 +18,7 @@ dependencies = [
     "click>=8.1.0",
     "httpx>=0.27",
     "starlette",
-    "uvicorn",
-    "netifaces"
+    "uvicorn"
 ]
 requires-python = ">=3.10"
 readme = "README.md"

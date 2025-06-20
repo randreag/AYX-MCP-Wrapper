@@ -425,7 +425,6 @@ dependencies = [
     { name = "click" },
     { name = "httpx" },
     { name = "mcp" },
-    { name = "netifaces" },
     { name = "python-dateutil" },
     { name = "requests" },
     { name = "setuptools" },
@@ -455,7 +454,6 @@ requires-dist = [
     { name = "click", specifier = ">=8.1.7" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "mcp", specifier = ">=1.6.0" },
-    { name = "netifaces" },
     { name = "python-dateutil", specifier = ">=2.5.3" },
     { name = "requests", specifier = ">=2.28.1" },
     { name = "setuptools", specifier = ">=21.0.0" },
@@ -487,12 +485,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/ce/a0/834b0cebabbfc7e31
 wheels = [
     { url = "https://files.pythonhosted.org/packages/2b/9f/7ba6f94fc1e9ac3d2b853fdff3035fb2fa5afbed898c4a72b8a020610594/more_itertools-10.7.0-py3-none-any.whl", hash = "sha256:d43980384673cb07d2f7d2d918c616b30c659c089ee23953f601d6609c67510e", size = 65278 },
 ]
-
-[[package]]
-name = "netifaces"
-version = "0.11.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/a6/91/86a6eac449ddfae239e93ffc1918cf33fd9bab35c04d1e963b311e347a73/netifaces-0.11.0.tar.gz", hash = "sha256:043a79146eb2907edf439899f262b3dfe41717d34124298ed281139a8b93ca32", size = 30106 }
 
 [[package]]
 name = "nh3"
