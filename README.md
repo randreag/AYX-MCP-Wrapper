@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP Protocol](https://img.shields.io/badge/MCP-Protocol-green.svg)](https://modelcontextprotocol.io/)
 
-A Model Context Protocol (MCP) server that provides a comprehensive interface to Alteryx Server APIs. This wrapper enables AI assistants and other MCP clients to interact with Alteryx Server for managing workflows, collections, users, schedules, credentials, and more.
+A Model Context Protocol (MCP) server that provides a comprehensive interface to Alteryx Servers. This wrapper enables AI assistants and other MCP clients to interact with Alteryx Server for managing workflows, collections, users, schedules, credentials, and more.
 
 ## Features
 
@@ -45,7 +45,7 @@ pip install mcp-server-alteryx
 ### From Source
 
 ```bash
-git clone https://github.com/your-username/AYX-MCP-Wrapper.git
+git clone https://github.com/jupiterbak/AYX-MCP-Wrapper.git
 cd AYX-MCP-Wrapper
 uv sync
 uv run pip install -e .
@@ -64,6 +64,7 @@ export ALTERYX_SERVER_URL="https://your-alteryx-server.com/webapi/"
 # Required: OAuth2 Client Credentials
 export ALTERYX_CLIENT_ID="your-client-id"
 export ALTERYX_CLIENT_SECRET="your-client-secret"
+export ALTERYX_VERIFY_SSL="1"
 
 # Optional: Logging level
 export LOG_LEVEL="INFO"
@@ -95,7 +96,33 @@ To use this MCP server with Claude Desktop, add the following configuration to y
       "env": {
         "ALTERYX_SERVER_URL": "https://your-alteryx-server.com/webapi/",
         "ALTERYX_CLIENT_ID": "your-client-id",
-        "ALTERYX_CLIENT_SECRET": "your-client-secret"
+        "ALTERYX_CLIENT_SECRET": "your-client-secret",
+        "ALTERYX_VERIFY_SSL": "1"
+      }
+    }
+  }
+}
+```
+
+However, we recommend to use it in combination with the "Sequential Thinking" tool:
+
+```json
+{   "mcpServers": {
+  "sequential-thinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "alteryx": {
+      "command": "uvx",
+      "args": ["mcp-server-alteryx", "--transport", "stdio"],
+      "env": {
+        "ALTERYX_API_HOST": "http://localhost/webapi/",
+        "ALTERYX_CLIENT_ID": "your-client-id",
+        "ALTERYX_CLIENT_SECRET": "your-client-secret",
+        "ALTERYX_VERIFY_SSL": "1"
       }
     }
   }
@@ -233,7 +260,7 @@ The MCP server provides comprehensive tools organized by functionality:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/AYX-MCP-Wrapper.git
+git clone https://github.com/jupiterbak/AYX-MCP-Wrapper.git
 cd AYX-MCP-Wrapper
 
 # Install dependencies
@@ -262,8 +289,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Related Projects
 
 - [Model Context Protocol](https://modelcontextprotocol.io/) - The MCP specification
-- [Alteryx Server API](https://help.alteryx.com/developer-help/server-api) - Official Alteryx Server documentation
-- [Claude Desktop](https://claude.ai/desktop) - Claude Desktop application
+- [Alteryx Server API](https://help.alteryx.com/current/en/server/api-overview/alteryx-server-api-v3.html) - Official Alteryx Server documentation
+- [Claude Desktop](https://claude.ai/download) - Claude Desktop application
 
 ---
 
