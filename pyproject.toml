@@ -1,6 +1,6 @@
 [project]
 name = "mcp-server-alteryx"
-version = "0.2.2"
+version = "0.2.11"
 description = "Model Context Protocol (MCP) server for Alteryx Server"
 authors = [
     { name = "Jupiter Bakakeu", email = "jupiter.bakakeu@gmail.com" }

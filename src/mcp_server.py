@@ -1,6 +1,7 @@
 from mcp.server.fastmcp import FastMCP
 from dotenv import load_dotenv
-from src.tools import AYXMCPTools
+from src.tools import AYXMCPTools, InputData
+from typing import List, Optional, Dict, Any
 
 
 class MCPAlteryxServer:
@@ -197,9 +198,27 @@ If the API key is missing or invalid, appropriate error messages will be returne
             return self.tools.get_workflow_jobs(workflow_id)
 
         @self.app.tool()
-        def execute_workflow(workflow_id: str):
-            """Execute a workflow on the Alteryx server"""
-            return self.tools.execute_workflow(workflow_id)
+        def start_workflow_execution(workflow_id: str, input_data: list[InputData] = None):
+            """Start a workflow execution by its ID and return the job ID. 
+            This will create a new job and add it to the execution queue.
+            This call will return a job ID that can be used to get the job details later. 
+            The input data is a list of name-value pairs, each containing a name and value."""
+            return self.tools.start_workflow_execution(workflow_id, input_data)
+        
+        @self.app.tool()
+        def execute_workflow_with_monitoring(
+                workflow_id: str, 
+                input_data: list[InputData] = None
+        ):
+            """Execute a workflow by its ID and monitor its execution status. This call will return a jobID, he Job status and the job details once the execution is completed or failed.
+            The input data parameter is a list of name-value pairs, each containing a name and value. """
+            return self.tools.execute_workflow_with_monitoring(
+                workflow_id, 
+                input_data, 
+                wait_for_completion=True,
+                timeout_seconds=300,  # 5 minutes timeout
+                poll_interval_seconds=10
+            )
 
         # Register Users tools
         @self.app.tool()

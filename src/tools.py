@@ -1,11 +1,14 @@
 import src.server_client as server_client
 from src.server_client.rest import ApiException
+from typing import List, Optional, Dict, Any
 import pprint
 import tempfile
 import zipfile
 import os
 import shutil
 from pydantic import BaseModel
+import xml.etree.ElementTree as ET
+import time
 
 
 class InputData(BaseModel):
@@ -157,9 +160,9 @@ class AYXMCPTools:
             workflow = self.workflows_api.workflows_get_workflow(workflow_id)
             if not workflow:
                 return "Error: Workflow not found"
-            workflow_details = server_client.WorkflowView(**workflow)
+            workflow_details = workflow
             latest_version_id = server_client.WorkflowVersionView(
-                **workflow_details.versions[len(workflow_details.versions) - 1]
+                workflow_details.versions[len(workflow_details.versions) - 1]
             ).version_id
             contract = server_client.UpdateWorkflowContract(
                 name=name if name else workflow_details.name,
@@ -207,9 +210,10 @@ class AYXMCPTools:
         except ApiException as e:
             return f"Error: {e}"
 
-    def execute_workflow(self, workflow_id: str, input_data: list[InputData] = None):
-        """Execute a workflow its ID. This will create a new job and add it to the execution queue.
-        This call will return a job ID that can be used to get the job details.
+    def start_workflow_execution(self, workflow_id: str, input_data: list[InputData] = None):
+        """Start a workflow execution by its ID and return the job ID. This will create a new job and add it to the execution queue.
+        This call will return a job ID that can be used to get the job details. Once the job is executed, 
+        the results can be retrieved via the produced JobID
         The input data is a list of name-value pairs, each containing a name and value."""
         try:
             workflow = self.workflows_api.workflows_get_workflow(workflow_id)
@@ -222,12 +226,119 @@ class AYXMCPTools:
                 for question in questions:
                     if question.name not in [item.name for item in input_data]:
                         return f"Error: Input data must contain the question '{question.name}'"
-            workflow = server_client.WorkflowView(**workflow)
+                    
+            # Proper type conversion
+            workflow = server_client.WorkflowView(workflow)
             contract = server_client.EnqueueJobContract(worker_tag=workflow.worker_tag, questions=input_data)
             api_response = self.workflows_api.workflows_enqueue(workflow_id, contract)
             return pprint.pformat(api_response)
         except ApiException as e:
             return f"Error: {e}"
+
+
+    def execute_workflow_with_monitoring(
+            self,
+            workflow_id: str, 
+            input_data: Optional[List[InputData]] = None, 
+            wait_for_completion: bool = True,
+            timeout_seconds: int = 3600,
+            poll_interval_seconds: int = 5
+    ):
+        """ Execute a workflow and monitor its execution status. 
+        This call will return a jobID as well as the complete job details. 
+        The input data parameter is a list of name-value pairs, each containing a name and value. """
+        try:
+            workflow = self.workflows_api.workflows_get_workflow(workflow_id)
+            if not workflow:
+                return "Error: Workflow not found"
+            
+            questions = self.workflows_api.workflows_get_workflow_questions(workflow_id)
+            if (not questions or len(questions) == 0) and (input_data):
+                return "Error: Workflow has no questions, input data not allowed"
+            if questions and len(questions) > 0:
+                for question in questions:
+                    if question.name not in [item.name for item in input_data]:
+                        return f"Error: Input data must contain the question '{question.name}'"
+
+            # Start the workflow execution
+            contract = server_client.EnqueueJobContract(worker_tag=workflow.worker_tag, questions=input_data)
+            job_response = self.workflows_api.workflows_enqueue(workflow_id, contract)
+
+            # Parse the job response to get the job ID
+            if job_response.status != "Queued":
+                # Out put error
+                return pprint.pformat({
+                    "success": False,
+                    "job_id": job_id,
+                    "status": job_response.status,
+                    "message": f"Error: Workfow was not successfully started. Current JobID:'{job_response.id}"
+                })
+
+            # Extract the job id
+            job_id = job_response.id
+
+            if not wait_for_completion:
+                return pprint.pformat({
+                    "success": True,
+                    "job_id": job_id,
+                    "status": "Started",
+                    "message": "Job started successfully, not waiting for completion"
+                })
+
+            start_time = time.time()
+
+            while True:
+                # Check if timeout exceeded
+                if time.time() - start_time > timeout_seconds:
+                    return pprint.pformat({
+                        "success": False,
+                        "job_id": job_id,
+                        "status": "Timeout",
+                        "error": f"Job execution timed out after {timeout_seconds} seconds"
+                    })
+                
+                # Get job status
+                try:
+                    job_details = self.jobs_api.jobs_get_job_v3(job_id)
+                    
+                    if job_details.status in ["Completed", "Cancelled"]:
+                        # Get final job details including outputs and messages
+                        final_details = job_details
+                        job_messages = self.jobs_api.jobs_get_job_messages(job_id=job_id)
+                        return  pprint.pformat({
+                                "success": job_details.status == "Completed",
+                                "job_id": job_id,
+                                "status": job_details.status,
+                                "job_details": final_details,
+                                "execution_time_seconds": time.time() - start_time
+                            })
+                    # else:
+                    #     return pprint.pformat({
+                    #         "success": False,
+                    #         "job_id": job_id,
+                    #         "status": "Failed",
+                    #         "error": "Could not extract status from job details, continuing to monitor..."
+                    #     }) 
+                    
+                except Exception as e:
+                    return pprint.pformat({
+                        "success": False,
+                        "job_id": job_id,
+                        "status": "Failed",
+                        "error": f"Error checking job status: {str(e)}"
+                    })           
+                # Wait before next check
+                time.sleep(poll_interval_seconds)
+
+        except ApiException as e:
+            return pprint.pformat({
+                "success": False,
+                "error": f"Unexpected error: {str(e)}",
+                "job_id": None,
+                "status": "Failed"
+            })
+            
+
 
     # Users functions
     def get_all_users(self):
@@ -291,7 +402,7 @@ class AYXMCPTools:
         """Update details of an existing user by their ID. Can be used to update any of the user's details."""
         try:
             user_details = self.users_api.users_get_user(user_id)
-            user_details = server_client.UserView(**user_details)
+            
             if not user_details:
                 return "Error: User not found"
             contract = server_client.UpdateUserContract(
@@ -411,7 +522,7 @@ class AYXMCPTools:
             schedule = self.schedules_api.schedules_get_schedule(schedule_id)
             if not schedule:
                 return "Error: Schedule not found"
-            schedule = server_client.ScheduleView(**schedule)
+            
             contract = server_client.UpdateScheduleContract(
                 workflow_id=schedule.workflow_id,
                 owner_id=schedule.owner_id,
@@ -436,7 +547,7 @@ class AYXMCPTools:
             schedule = self.schedules_api.schedules_get_schedule(schedule_id)
             if not schedule:
                 return "Error: Schedule not found"
-            schedule = server_client.ScheduleView(**schedule)
+            
             contract = server_client.UpdateScheduleContract(
                 workflow_id=schedule.workflow_id,
                 owner_id=schedule.owner_id,
@@ -461,7 +572,7 @@ class AYXMCPTools:
             schedule = self.schedules_api.schedules_get_schedule(schedule_id)
             if not schedule:
                 return "Error: Schedule not found"
-            schedule = server_client.ScheduleView(**schedule)
+            
             contract = server_client.UpdateScheduleContract(
                 workflow_id=schedule.workflow_id,
                 owner_id=schedule.owner_id,
@@ -486,7 +597,7 @@ class AYXMCPTools:
             schedule = self.schedules_api.schedules_get_schedule(schedule_id)
             if not schedule:
                 return "Error: Schedule not found"
-            schedule = server_client.ScheduleView(**schedule)
+            
             contract = server_client.UpdateScheduleContract(
                 workflow_id=schedule.workflow_id,
                 owner_id=new_owner_id if new_owner_id else schedule.owner_id,
@@ -546,15 +657,25 @@ class AYXMCPTools:
             api_response = self.workflows_api.workflows_get_workflow(workflow_id)
             if api_response is None:
                 return "Error: Workflow not found"
+            
+            # Download the workflow file
             api_response = self.workflows_api.workflows_download_workflow(workflow_id)
+            if api_response is None:
+                return "Error: Failed to download workflow"
+            
+            # Create the output directory if it doesn't exist
+            if not os.path.exists(output_directory):
+                os.makedirs(output_directory)
+            
+            # Save the workflow file to the output directory
             with open(
-                f"{output_directory}/{workflow_id}.yxz",
-                "wb" if not os.path.exists(f"{output_directory}/{workflow_id}.yxz") else "wb+",
-                encoding="utf-8",
+                f"{output_directory}/{workflow_id}.yxzp",
+                "wb" if not os.path.exists(f"{output_directory}/{workflow_id}.yxzp") else "wb+",
             ) as f:
                 f.write(api_response)
+
             return (
-                f"Workflow {workflow_id} downloaded successfully. File saved to '{output_directory}/{workflow_id}.yxz'"
+                f"Workflow {workflow_id} downloaded successfully. File saved to '{output_directory}/{workflow_id}.yxzp'"
             )
         except ApiException as e:
             return f"Error: {e.body}"
@@ -565,24 +686,101 @@ class AYXMCPTools:
             api_response = self.workflows_api.workflows_get_workflow(workflow_id)
             if api_response is None:
                 return "Error: Workflow not found"
+            
+             # Download the workflow file
             api_response = self.workflows_api.workflows_download_workflow(workflow_id)
+            if api_response is None:
+                return "Error: Failed to download workflow"
+                
             temp_directory = tempfile.gettempdir()
+            
             with open(
-                f"{temp_directory}/{workflow_id}.yxz",
+                f"{temp_directory}/{workflow_id}.yxzp",
                 "wb" if not os.path.exists(f"{temp_directory}/{workflow_id}.yxz") else "wb+",
             ) as f:
                 f.write(api_response)
+
             new_directory = f"{temp_directory}/{workflow_id}"
             if os.path.exists(new_directory):
                 shutil.rmtree(new_directory)
             os.makedirs(new_directory)
-            with zipfile.ZipFile(f"{temp_directory}/{workflow_id}.yxz", "r") as zip_ref:
+            
+            with zipfile.ZipFile(f"{temp_directory}/{workflow_id}.yxzp", "r") as zip_ref:
                 zip_ref.extractall(new_directory)
+            
             yxmd_files = [file for file in os.listdir(new_directory) if file.endswith(".yxmd")]
             if len(yxmd_files) == 0:
                 return "Error: Workflow XML file not found after unzipping"
+            
             yxmd_file = yxmd_files[0]
-            with open(f"{new_directory}/{yxmd_file}", "r") as f:
-                return f.read()
+            
+            # Read as binary first, then decode as UTF-8
+            with open(f"{new_directory}/{yxmd_file}", "rb") as f:
+                binary_content = f.read()
+                try:
+                    # Try to decode as UTF-8
+                    return binary_content.decode('utf-8')
+                except UnicodeDecodeError:
+                    # If UTF-8 fails, return the binary content as a string representation
+                    return binary_content
+            
         except ApiException as e:
             return f"Error: {e}"
+        
+
+    # def get_workflow_tools(self, workflow_id: str):
+    #     """Get all the tools and their properties of a workflow by the workflow ID"""
+    #     api_response = self.workflows_api.workflows_get_workflow(workflow_id)
+    #     if api_response is None:
+    #         return "Error: Workflow not found"
+        
+    #         # Download the workflow file
+    #     api_response = self.workflows_api.workflows_download_workflow(workflow_id)
+    #     if api_response is None:
+    #         return "Error: Failed to download workflow"
+            
+    #     temp_directory = tempfile.gettempdir()
+        
+    #     with open(
+    #         f"{temp_directory}/{workflow_id}.yxzp",
+    #         "wb" if not os.path.exists(f"{temp_directory}/{workflow_id}.yxz") else "wb+",
+    #     ) as f:
+    #         f.write(api_response)
+
+    #     new_directory = f"{temp_directory}/{workflow_id}"
+    #     if os.path.exists(new_directory):
+    #         shutil.rmtree(new_directory)
+    #     os.makedirs(new_directory)
+        
+    #     with zipfile.ZipFile(f"{temp_directory}/{workflow_id}.yxzp", "r") as zip_ref:
+    #         zip_ref.extractall(new_directory)
+        
+    #     yxmd_files = [file for file in os.listdir(new_directory) if file.endswith(".yxmd")]
+    #     if len(yxmd_files) == 0:
+    #         return "Error: Workflow XML file not found after unzipping"
+        
+    #     yxmd_file = yxmd_files[0]
+
+    #     # Read as binary first, then decode as UTF-8
+    #     with open(f"{new_directory}/{yxmd_file}", "rb") as f:
+    #         binary_content = f.read()
+    #         try:
+    #             # Try to decode as UTF-8
+    #             xml_content = binary_content.decode('utf-8')
+    #         except UnicodeDecodeError:
+    #             # If UTF-8 fails, return the binary content as a string representation
+    #             xml_content = binary_content
+
+    #     # Parse the XML content 
+    #     root = ET.fromstring(xml_content)
+    #     tools = root.findall(".//Node")
+    #     tools_dict = {}
+    #     for tool in tools:
+    #         tool_id = tool.get("ToolID")
+    #         tool_dict = {}
+    #         for prop in tool.findall(".//Configuration"):
+    #             prop_name = prop.get("Name")
+    #             prop_value = prop.get("Value")
+    #             tool_dict[prop_name] = prop_value
+    #         tools_dict[tool_id] = tool_dict
+    #     return tools_dict
