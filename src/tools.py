@@ -486,7 +486,12 @@ class AYXMCPTools:
     def get_all_job_messages(self, job_id: str):
         """Get all the messages for a job"""
         try:
-            api_response = self.jobs_api.jobs_get_job_v3(job_id, include_messages=True)
+            # check if job exists
+            job = self.jobs_api.jobs_get_job_v3(job_id)
+            if not job:
+                return "Error: Job not found"
+            
+            api_response = self.jobs_api.jobs_get_job_messages(job_id)
             return pprint.pformat(api_response)
         except ApiException as e:
             return f"Error: {e}"
@@ -496,6 +501,76 @@ class AYXMCPTools:
         try:
             api_response = self.jobs_api.jobs_get_job_v3(job_id)
             return pprint.pformat(api_response)
+        except ApiException as e:
+            return f"Error: {e}"
+        
+    def get_job_output_data(self, job_id: str):
+        """Get the output data for a job"""
+        try:
+            # check if job exists
+            job = self.jobs_api.jobs_get_job_v3(job_id)
+            if not job:
+                return "Error: Job not found"
+            # check if job is completed
+            if job.status != "Completed":
+                return "Error: Job is not completed"
+            
+            temp_directory = self.configuration.temp_directory
+            # normalize the temp directory
+            temp_directory = os.path.normpath(temp_directory)
+            if not os.path.exists(temp_directory):
+                os.makedirs(temp_directory)
+            all_output_files = []
+
+            for output in job.outputs:
+                output_id = output.id
+                file_name = output.file_name
+                available_output_types = output.available_formats
+                # get file name with extension from file_name
+                # Extract base name without extension if it exists
+                base_name = os.path.splitext(os.path.basename(file_name))[0]
+                
+                # Get the file extension from the file name
+                raw_file_extension = os.path.splitext(os.path.basename(file_name))[1]
+
+                # Map output format to file extension
+                format_extension_map = {
+                    'Raw': raw_file_extension if raw_file_extension else '.txt',
+                    'Yxdb': '.yxdb',
+                    'Shp': '.shp',
+                    'Kml': '.kml',
+                    'Tab': '.tab',
+                    'Mif': '.mif',
+                    'Dbf': '.dbf',
+                    'Csv': '.csv',
+                    'Pdf': '.pdf',
+                    'Docx': '.docx',
+                    'Xlsx': '.xlsx',
+                    'Html': '.html',
+                    'Tde': '.tde',
+                    'Zip': '.zip'
+                }
+
+                # Get the extension for the first available format
+                output_format = available_output_types[0] if available_output_types else 'Raw'
+                file_extension = format_extension_map.get(output_format, raw_file_extension)
+                file_name_with_extension = base_name + file_extension
+
+                # get the output data
+                api_response = self.jobs_api.jobs_get_output_file(job_id, output_id, output_format)
+
+                # Convert to bytes if it's a string
+                if isinstance(api_response, str):
+                    api_response_bytes = api_response.encode('utf-8')
+                else:
+                    api_response_bytes = api_response
+
+                with open(f"{temp_directory}/{job_id}_{output_id}_{file_name_with_extension}", "wb") as f:
+                    f.write(api_response_bytes)
+
+                all_output_files.append(f"{temp_directory}/{job_id}_{output_id}_{file_name_with_extension}")
+
+            return f"Output files saved to:  {pprint.pformat(all_output_files)} \n\n"
         except ApiException as e:
             return f"Error: {e}"
 
@@ -651,7 +726,7 @@ class AYXMCPTools:
             return f"Error: {e}"
 
     # Workflow file functions
-    def download_workflow_package_file(self, workflow_id: str, output_directory: str):
+    def download_workflow_package_file(self, workflow_id: str):
         """Download a workflow package file by its ID and save it to the local directory"""
         try:
             api_response = self.workflows_api.workflows_get_workflow(workflow_id)
@@ -664,18 +739,21 @@ class AYXMCPTools:
                 return "Error: Failed to download workflow"
             
             # Create the output directory if it doesn't exist
-            if not os.path.exists(output_directory):
-                os.makedirs(output_directory)
+            temp_directory = self.configuration.temp_directory
+            # normalize the temp directory
+            temp_directory = os.path.normpath(temp_directory)
+            if not os.path.exists(temp_directory):
+                os.makedirs(temp_directory)
             
             # Save the workflow file to the output directory
             with open(
-                f"{output_directory}/{workflow_id}.yxzp",
-                "wb" if not os.path.exists(f"{output_directory}/{workflow_id}.yxzp") else "wb+",
+                f"{temp_directory}/{workflow_id}.yxzp",
+                "wb" if not os.path.exists(f"{temp_directory}/{workflow_id}.yxzp") else "wb+",
             ) as f:
                 f.write(api_response)
 
             return (
-                f"Workflow {workflow_id} downloaded successfully. File saved to '{output_directory}/{workflow_id}.yxzp'"
+                f"Workflow {workflow_id} downloaded successfully. File saved to '{temp_directory}/{workflow_id}.yxzp'"
             )
         except ApiException as e:
             return f"Error: {e.body}"
@@ -692,7 +770,12 @@ class AYXMCPTools:
             if api_response is None:
                 return "Error: Failed to download workflow"
                 
-            temp_directory = tempfile.gettempdir()
+            # Create the output directory if it doesn't exist
+            temp_directory = self.configuration.temp_directory
+            # normalize the temp directory
+            temp_directory = os.path.normpath(temp_directory)
+            if not os.path.exists(temp_directory):
+                os.makedirs(temp_directory)
             
             with open(
                 f"{temp_directory}/{workflow_id}.yxzp",
@@ -708,21 +791,14 @@ class AYXMCPTools:
             with zipfile.ZipFile(f"{temp_directory}/{workflow_id}.yxzp", "r") as zip_ref:
                 zip_ref.extractall(new_directory)
             
-            yxmd_files = [file for file in os.listdir(new_directory) if file.endswith(".yxmd")]
+            yxmd_files = [file for file in os.listdir(new_directory) if file.endswith(".yxmd") or file.endswith(".yxwz")]
             if len(yxmd_files) == 0:
-                return "Error: Workflow XML file not found after unzipping"
+                return "Error: No Workflow or Analytics App XML file found after unzipping the downloaded workflow package file"
             
             yxmd_file = yxmd_files[0]
             
-            # Read as binary first, then decode as UTF-8
-            with open(f"{new_directory}/{yxmd_file}", "rb") as f:
-                binary_content = f.read()
-                try:
-                    # Try to decode as UTF-8
-                    return binary_content.decode('utf-8')
-                except UnicodeDecodeError:
-                    # If UTF-8 fails, return the binary content as a string representation
-                    return binary_content
+            # Return the path to the XML file
+            return f"Workflow XML file saved to: {new_directory}/{yxmd_file}"
             
         except ApiException as e:
             return f"Error: {e}"

@@ -45,20 +45,14 @@ def extract_workflow_xml(workflow_id):
         with zipfile.ZipFile(f"{temp_directory}/{workflow_id}.yxz", "r") as zip_ref:
             zip_ref.extractall(new_directory)
         
-        yxmd_files = [file for file in os.listdir(new_directory) if file.endswith(".yxmd")]
+        yxmd_files = [file for file in os.listdir(new_directory) if file.endswith(".yxmd") or file.endswith(".yxwz")]
         if len(yxmd_files) == 0:
-            return "Error: Workflow XML file not found after unzipping"
+            return "Error: No Workflow or Analytics App XML file found after unzipping"
         
         yxmd_file = yxmd_files[0]
-        # Read as binary first, then decode as UTF-8
-        with open(f"{new_directory}/{yxmd_file}", "rb") as f:
-            binary_content = f.read()
-            try:
-                # Try to decode as UTF-8
-                return binary_content.decode('utf-8')
-            except UnicodeDecodeError:
-                # If UTF-8 fails, return the binary content as a string representation
-                return binary_content
+        
+        # Return the path to the XML file
+        return f"{new_directory}/{yxmd_file}"
                 
     except Exception as e:
         return f"Error: {str(e)}"

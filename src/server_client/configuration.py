@@ -18,6 +18,7 @@ import multiprocessing
 import sys
 import urllib3
 import os
+import tempfile
 
 import six
 from six.moves import http_client as httplib
@@ -63,6 +64,9 @@ class Configuration(object):
         self.access_token = ""
         # OAuth2 token endpoint
         self.token_url = "/oauth2/token"
+
+        # Temp Directory
+        self.temp_directory = os.getenv("ALTERYX_TEMP_DIRECTORY", tempfile.gettempdir())
 
         # Logging Settings
         self.logger = {}
