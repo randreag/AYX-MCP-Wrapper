@@ -66,6 +66,9 @@ export ALTERYX_CLIENT_ID="your-client-id"
 export ALTERYX_CLIENT_SECRET="your-client-secret"
 export ALTERYX_VERIFY_SSL="1"
 
+# Optional: temporary folder
+export ALTERYX_TEMP_DIRECTORY="your-temp-directory"
+
 # Optional: Logging level
 export LOG_LEVEL="INFO"
 ```
@@ -97,7 +100,8 @@ To use this MCP server with Claude Desktop, add the following configuration to y
         "ALTERYX_SERVER_URL": "https://your-alteryx-server.com/webapi/",
         "ALTERYX_CLIENT_ID": "your-client-id",
         "ALTERYX_CLIENT_SECRET": "your-client-secret",
-        "ALTERYX_VERIFY_SSL": "1"
+        "ALTERYX_VERIFY_SSL": "1",
+        "ALTERYX_TEMP_DIRECTORY":"your-temp-directory"
       }
     }
   }
@@ -122,7 +126,8 @@ However, we recommend to use it in combination with the "Sequential Thinking" to
         "ALTERYX_API_HOST": "http://localhost/webapi/",
         "ALTERYX_CLIENT_ID": "your-client-id",
         "ALTERYX_CLIENT_SECRET": "your-client-secret",
-        "ALTERYX_VERIFY_SSL": "1"
+        "ALTERYX_VERIFY_SSL": "1",
+        "ALTERYX_TEMP_DIRECTORY":"your-temp-directory"
       }
     }
   }
@@ -152,7 +157,8 @@ For Cursor IDE integration, add to your Cursor settings:
       "env": {
         "ALTERYX_SERVER_URL": "https://your-alteryx-server.com/webapi/",
         "ALTERYX_CLIENT_ID": "your-client-id",
-        "ALTERYX_CLIENT_SECRET": "your-client-secret"
+        "ALTERYX_CLIENT_SECRET": "your-client-secret",
+        "ALTERYX_TEMP_DIRECTORY":"your-temp-directory"
       }
     }
   }
@@ -207,7 +213,8 @@ The MCP server provides comprehensive tools organized by functionality:
 | `update_workflow_name_or_comment(workflow_id, name, comment)` | Update workflow properties | `workflow_id: str, name: str, comment: str` |
 | `transfer_workflow(workflow_id, new_owner_id)` | Transfer workflow ownership | `workflow_id: str, new_owner_id: str` |
 | `get_workflow_jobs(workflow_id)` | Get jobs for a workflow | `workflow_id: str` |
-| `execute_workflow(workflow_id, input_data)` | Execute a workflow with input data | `workflow_id: str, input_data: List[InputData]` |
+| `start_workflow_execution(workflow_id, input_data)` | Start workflow execution and return job ID | `workflow_id: str, input_data: List[InputData]` |
+| `execute_workflow_with_monitoring(workflow_id, input_data)` | Execute workflow and monitor completion | `workflow_id: str, input_data: List[InputData]` |
 | `download_workflow_package_file(workflow_id, output_directory)` | Download workflow package | `workflow_id: str, output_directory: str` |
 | `get_workflow_xml(workflow_id)` | Extract workflow XML | `workflow_id: str` |
 
@@ -244,6 +251,7 @@ The MCP server provides comprehensive tools organized by functionality:
 |----------|-------------|------------|
 | `get_all_job_messages(job_id)` | Get messages for a specific job | `job_id: str` |
 | `get_job_by_id(job_id)` | Get job details | `job_id: str` |
+| `get_job_output_data(job_id)` | Get output data files from completed job | `job_id: str` |
 
 ### Credentials & Connections
 
