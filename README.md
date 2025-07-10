@@ -59,11 +59,13 @@ Set up your Alteryx Server credentials using environment variables:
 
 ```bash
 # Required: Alteryx Server API URL
-export ALTERYX_SERVER_URL="https://your-alteryx-server.com/webapi/"
+export ALTERYX_API_HOST="https://your-alteryx-server.com/webapi/"
 
 # Required: OAuth2 Client Credentials
 export ALTERYX_CLIENT_ID="your-client-id"
 export ALTERYX_CLIENT_SECRET="your-client-secret"
+
+# Optional: SSL Verification (default: true)
 export ALTERYX_VERIFY_SSL="1"
 
 # Optional: temporary folder
@@ -78,9 +80,11 @@ export LOG_LEVEL="INFO"
 Alternatively, create a `.env` file in your project root:
 
 ```env
-ALTERYX_SERVER_URL=https://your-alteryx-server.com/webapi/
+ALTERYX_API_HOST=https://your-alteryx-server.com/webapi/
 ALTERYX_CLIENT_ID=your-client-id
 ALTERYX_CLIENT_SECRET=your-client-secret
+ALTERYX_VERIFY_SSL=1
+ALTERYX_TEMP_DIRECTORY=your-temp-directory
 LOG_LEVEL=INFO
 ```
 
@@ -97,11 +101,11 @@ To use this MCP server with Claude Desktop, add the following configuration to y
       "command": "uvx",
       "args": ["mcp-server-alteryx", "--transport", "stdio"],
       "env": {
-        "ALTERYX_SERVER_URL": "https://your-alteryx-server.com/webapi/",
+        "ALTERYX_API_HOST": "https://your-alteryx-server.com/webapi/",
         "ALTERYX_CLIENT_ID": "your-client-id",
         "ALTERYX_CLIENT_SECRET": "your-client-secret",
         "ALTERYX_VERIFY_SSL": "1",
-        "ALTERYX_TEMP_DIRECTORY":"your-temp-directory"
+        "ALTERYX_TEMP_DIRECTORY": "your-temp-directory"
       }
     }
   }
@@ -127,7 +131,7 @@ However, we recommend to use it in combination with the "Sequential Thinking" to
         "ALTERYX_CLIENT_ID": "your-client-id",
         "ALTERYX_CLIENT_SECRET": "your-client-secret",
         "ALTERYX_VERIFY_SSL": "1",
-        "ALTERYX_TEMP_DIRECTORY":"your-temp-directory"
+        "ALTERYX_TEMP_DIRECTORY": "your-temp-directory"
       }
     }
   }
@@ -155,10 +159,10 @@ For Cursor IDE integration, add to your Cursor settings:
       "command": "uvx",
       "args": ["mcp-server-alteryx", "--transport", "stdio"],
       "env": {
-        "ALTERYX_SERVER_URL": "https://your-alteryx-server.com/webapi/",
+        "ALTERYX_API_HOST": "https://your-alteryx-server.com/webapi/",
         "ALTERYX_CLIENT_ID": "your-client-id",
         "ALTERYX_CLIENT_SECRET": "your-client-secret",
-        "ALTERYX_TEMP_DIRECTORY":"your-temp-directory"
+        "ALTERYX_TEMP_DIRECTORY": "your-temp-directory"
       }
     }
   }
