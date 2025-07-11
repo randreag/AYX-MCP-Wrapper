@@ -21,7 +21,7 @@ import os
 import tempfile
 
 import six
-from six.moves import http_client as httplib
+import http.client as httplib
 
 
 class Configuration(object):

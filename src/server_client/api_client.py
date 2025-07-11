@@ -21,7 +21,7 @@ import tempfile
 
 # python 2 and python 3 compatibility library
 import six
-from six.moves.urllib.parse import quote
+from urllib.parse import quote
 
 from src.server_client.configuration import Configuration
 import src.server_client.models as server_client_models
@@ -51,7 +51,7 @@ class ApiClient(object):
     PRIMITIVE_TYPES = (float, bool, bytes, six.text_type) + six.integer_types
     NATIVE_TYPES_MAPPING = {
         "int": int,
-        "long": int if six.PY3 else long,  # noqa: F821
+        "long": int,  # In Python 3, long is just int
         "float": float,
         "str": str,
         "bool": bool,

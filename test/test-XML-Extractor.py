@@ -61,7 +61,7 @@ def extract_workflow_xml(workflow_id):
 def main():
     """Main function to demonstrate usage of extract_workflow_xml."""
     # Example usage - you would need to provide actual values
-    workflow_id = "67e10abe127dd21432a1df79"
+    workflow_id = "686e0d65c04bebdd09cdda5e"
     
     try:
         xml_content = extract_workflow_xml(workflow_id)
