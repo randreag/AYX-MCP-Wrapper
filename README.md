@@ -4,6 +4,14 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP Protocol](https://img.shields.io/badge/MCP-Protocol-green.svg)](https://modelcontextprotocol.io/)
 
+## ⚠️ DISCLAIMER
+
+**This is NOT an official implementation.**
+
+This project is a personal initiative and is not affiliated with, endorsed by, or supported by any company. Even if the maintainer is an employee of a related company, this project is developed independently without any official backing or support.
+
+---
+
 A Model Context Protocol (MCP) server that provides a comprehensive interface to Alteryx Servers. This wrapper enables AI assistants and other MCP clients to interact with Alteryx Server for managing workflows, collections, users, schedules, credentials, and more.
 
 ## Features
@@ -55,11 +63,11 @@ uv run pip install -e .
 
 ### Environment Variables
 
-Set up your Alteryx Server credentials using environment variables:
+Set up your Server credentials using environment variables:
 
 ```bash
-# Required: Alteryx Server API URL
-export ALTERYX_API_HOST="https://your-alteryx-server.com/webapi/"
+# Required: Server API URL
+export ALTERYX_API_HOST="https://your-server.com/webapi/"
 
 # Required: OAuth2 Client Credentials
 export ALTERYX_CLIENT_ID="your-client-id"
@@ -80,7 +88,7 @@ export LOG_LEVEL="INFO"
 Alternatively, create a `.env` file in your project root:
 
 ```env
-ALTERYX_API_HOST=https://your-alteryx-server.com/webapi/
+ALTERYX_API_HOST=https://your-server.com/webapi/
 ALTERYX_CLIENT_ID=your-client-id
 ALTERYX_CLIENT_SECRET=your-client-secret
 ALTERYX_VERIFY_SSL=1
@@ -101,7 +109,7 @@ To use this MCP server with Claude Desktop, add the following configuration to y
       "command": "uvx",
       "args": ["mcp-server-alteryx", "--transport", "stdio"],
       "env": {
-        "ALTERYX_API_HOST": "https://your-alteryx-server.com/webapi/",
+        "ALTERYX_API_HOST": "https://your-server.com/webapi/",
         "ALTERYX_CLIENT_ID": "your-client-id",
         "ALTERYX_CLIENT_SECRET": "your-client-secret",
         "ALTERYX_VERIFY_SSL": "1",
@@ -110,6 +118,7 @@ To use this MCP server with Claude Desktop, add the following configuration to y
     }
   }
 }
+```
 ```
 
 However, we recommend to use it in combination with the "Sequential Thinking" tool:
@@ -141,7 +150,7 @@ However, we recommend to use it in combination with the "Sequential Thinking" to
 **Configuration Options:**
 - `command`: The uvx executable to use
 - `args`: Command line arguments for the MCP server
-- `env`: Environment variables for Alteryx Server authentication
+- `env`: Environment variables for Server authentication
 
 **Transport Options:**
 - `stdio`: Standard input/output (recommended for Claude Desktop)
@@ -301,9 +310,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Related Projects
 
 - <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer">Model Context Protocol</a> - The MCP specification
-- <a href="https://help.alteryx.com/current/en/server/api-overview/alteryx-server-api-v3.html" target="_blank" rel="noopener noreferrer">Alteryx Server API</a> - Official Alteryx Server documentation
 - <a href="https://claude.ai/download" target="_blank" rel="noopener noreferrer">Claude Desktop</a> - Claude Desktop application
 
 ---
 
-**Made with ❤️ for the Alteryx community** 
+**Made with ❤️ for the community** 
