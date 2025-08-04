@@ -113,7 +113,7 @@ def get_workflow_tool_list(workflow_id: str):
 def main():
     """Main function to demonstrate usage of extract_workflow_xml."""
     # Example usage - you would need to provide actual values
-    workflow_id = "686e0d65c04bebdd09cdda5e"
+    workflow_id = "6842bc308e47a4a1a1387189"
     
     try:
         tools_dict = get_workflow_tool_list(workflow_id)
