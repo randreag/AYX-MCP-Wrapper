@@ -77,6 +77,8 @@ Thumbs.db
 
 # Environment variables
 .env
+.env_localhost
+.env_next_wave
 
 # uv
 uv.lock

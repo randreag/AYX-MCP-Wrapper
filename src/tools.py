@@ -228,9 +228,14 @@ class AYXMCPTools:
                     if question.name not in [item.name for item in input_data]:
                         return f"Error: Input data must contain the question '{question.name}'"
                     
+            # Convert InputData objects to AppValue objects
+            app_values = None
+            if input_data:
+                app_values = [server_client.AppValue(name=item.name, value=item.value) for item in input_data]
+                    
             # Proper type conversion
             workflow = server_client.WorkflowView(workflow)
-            contract = server_client.EnqueueJobContract(worker_tag=workflow.worker_tag, questions=input_data)
+            contract = server_client.EnqueueJobContract(worker_tag=workflow.worker_tag, questions=app_values)
             api_response = self.workflows_api.workflows_enqueue(workflow_id, contract)
             return pprint.pformat(api_response)
         except ApiException as e:
@@ -261,8 +266,13 @@ class AYXMCPTools:
                     if question.name not in [item.name for item in input_data]:
                         return f"Error: Input data must contain the question '{question.name}'"
 
+            # Convert InputData objects to AppValue objects
+            app_values = None
+            if input_data:
+                app_values = [server_client.AppValue(name=item.name, value=item.value) for item in input_data]
+
             # Start the workflow execution
-            contract = server_client.EnqueueJobContract(worker_tag=workflow.worker_tag, questions=input_data)
+            contract = server_client.EnqueueJobContract(worker_tag=workflow.worker_tag, questions=app_values)
             job_response = self.workflows_api.workflows_enqueue(workflow_id, contract)
 
             # Parse the job response to get the job ID
