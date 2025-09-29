@@ -455,7 +455,7 @@ wheels = [
 
 [[package]]
 name = "mcp-server-alteryx"
-version = "0.2.20"
+version = "0.2.22"
 source = { editable = "." }
 dependencies = [
     { name = "anyio" },
