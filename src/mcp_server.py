@@ -22,17 +22,18 @@ class MCPAlteryxServer:
         self.tools = AYXMCPTools()
 
         # Initialize the setting for the FastMCP app
-        #settings = {
-            # "debug": True,
-            # "log_level": "DEBUG",
-            # "host": "0.0.0.0",
-            # "port": 3001,
-       #  }
+        settings = {
+             "debug": True,
+             "log_level": "DEBUG",
+             "host": "0.0.0.0",
+             "port": 10000,
+        }
         # Initialize the FastMCP app
         self.app = FastMCP(
-            name="mcp-alteryx-server" 
+            name="mcp-alteryx-server",
+            settings=settings
         """
-            #settings=settings
+           
 # MCP Wrapper for Alteryx server
 
 This MCP server provides tools for querying the remote Alteryx server using the Alteryx V3 API. It allows you to CRUD operations on Alteryx workflows, collections, users, jobs, connections and credendentials stored in the Alteryx server.
