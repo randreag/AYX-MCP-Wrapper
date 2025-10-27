@@ -27,7 +27,8 @@ class MCPAlteryxServer:
        #  }
         # Initialize the FastMCP app
         self.app = FastMCP(
-            name="mcp-alteryx-server",
+            name="mcp-alteryx-server" 
+        """
             #settings=settings
 # MCP Wrapper for Alteryx server
 
@@ -279,7 +280,7 @@ If the API key is missing or invalid, appropriate error messages will be returne
 
         @self.app.tool()
         def reset_user_password(user_id: str):
-            """Reset a users password by their ID"""
+            """Reset a user's password by their ID"""
             return self.tools.reset_user_password(user_id)
 
         # Register Jobs tools
