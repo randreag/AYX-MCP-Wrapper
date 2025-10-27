@@ -365,8 +365,7 @@ if __name__ == "__main__":
     # Si FastMCP no tiene run(), mantenemos el proceso vivo
     if hasattr(server.app, "run"):
         print("✅ Running FastMCP app...")
-        port = int(os.environ.get("PORT", 10000))
-        server.app.run(host="0.0.0.0", port=port)
+        server.app.run()
     else:
         print("⚠️ FastMCP has no run() method — holding process alive...")
         while True:
