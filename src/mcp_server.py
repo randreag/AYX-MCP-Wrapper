@@ -359,29 +359,19 @@ If the API key is missing or invalid, appropriate error messages will be returne
         
 
 if __name__ == "__main__":
-    print("🔹 Starting MCP Alteryx Server...")
     server = MCPAlteryxServer()
     server.initialize()
 
-    # Ejecutar FastMCP si existe el método run
-    if hasattr(server.app, "run"):
-        print("✅ FastMCP run() exists, executing it...")
-        try:
-            server.app.run()  # sin host ni port
-            # Si run() termina inmediatamente, mantenemos el proceso vivo
-            print("⚠️ FastMCP.run() finished immediately, holding process alive...")
-            while True:
-                time.sleep(60)
-        except Exception:
-            print("❌ Error running FastMCP.run():")
-            traceback.print_exc()
-            print("⚠️ Holding process alive to prevent Render from exiting...")
-            while True:
-                time.sleep(60)
-    else:
-        print("⚠️ No run() method — holding process alive...")
+    try:
+        if hasattr(server.app, "run"):
+            # Ejecuta run() sin print después
+            server.app.run()
+        # Si run() termina inmediatamente, mantenemos el proceso vivo
         while True:
             time.sleep(60)
 
-
-
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        while True:
+            time.sleep(60)
