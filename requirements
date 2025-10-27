@@ -1,8 +1,0 @@
-requests
-xmltodict
-python-dotenv
-fastapi
-uvicorn
-fastMCP
-gunicorn
-flask
