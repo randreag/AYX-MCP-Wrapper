@@ -19,16 +19,16 @@ class MCPAlteryxServer:
         self.tools = AYXMCPTools()
 
         # Initialize the setting for the FastMCP app
-        settings = {
-             "debug": True,
-             "log_level": "DEBUG",
-             "host": "0.0.0.0",
-             "port": 3001,
-         }
+        #settings = {
+            # "debug": True,
+            # "log_level": "DEBUG",
+            # "host": "0.0.0.0",
+            # "port": 3001,
+       #  }
         # Initialize the FastMCP app
         self.app = FastMCP(
             name="mcp-alteryx-server",
-            settings=settings,
+            #settings=settings,
             prompt="""
 # MCP Wrapper for Alteryx server
 
@@ -352,5 +352,25 @@ If the API key is missing or invalid, appropriate error messages will be returne
         def get_connection_by_id(connection_id: str):
             """Get a connection by its ID"""
             return self.tools.get_connection_by_id(connection_id)
-
         return self
+        
+import os
+import time
+
+if __name__ == "__main__":
+    print("🔹 Starting MCP Alteryx Server...")
+    server = MCPAlteryxServer()
+    server.initialize()
+
+    # Si FastMCP no tiene run(), mantenemos el proceso vivo
+    if hasattr(server.app, "run"):
+        print("✅ Running FastMCP app...")
+        port = int(os.environ.get("PORT", 10000))
+        server.app.run(host="0.0.0.0", port=port)
+    else:
+        print("⚠️ FastMCP has no run() method — holding process alive...")
+        while True:
+            time.sleep(60)
+
+
+
