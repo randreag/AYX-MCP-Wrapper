@@ -2,6 +2,7 @@ requests
 xmltodict
 python-dotenv
 fastapi
+fastmcp
 uvicorn
 gunicorn
 flask
