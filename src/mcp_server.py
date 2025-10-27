@@ -28,8 +28,7 @@ class MCPAlteryxServer:
         # Initialize the FastMCP app
         self.app = FastMCP(
             name="mcp-alteryx-server",
-            #settings=settings,
-            prompt="""
+            #settings=settings
 # MCP Wrapper for Alteryx server
 
 This MCP server provides tools for querying the remote Alteryx server using the Alteryx V3 API. It allows you to CRUD operations on Alteryx workflows, collections, users, jobs, connections and credendentials stored in the Alteryx server.
