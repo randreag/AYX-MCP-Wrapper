@@ -2,6 +2,9 @@ from mcp.server.fastmcp import FastMCP
 from dotenv import load_dotenv
 from src.tools import AYXMCPTools, InputData
 from typing import List, Optional, Dict, Any
+import time
+import os
+import traceback
 
 
 class MCPAlteryxServer:
@@ -354,20 +357,29 @@ If the API key is missing or invalid, appropriate error messages will be returne
             return self.tools.get_connection_by_id(connection_id)
         return self
         
-import os
-import time
 
 if __name__ == "__main__":
     print("🔹 Starting MCP Alteryx Server...")
     server = MCPAlteryxServer()
     server.initialize()
 
-    # Si FastMCP no tiene run(), mantenemos el proceso vivo
+    # Ejecutar FastMCP si existe el método run
     if hasattr(server.app, "run"):
-        print("✅ Running FastMCP app...")
-        server.app.run()
+        print("✅ FastMCP run() exists, executing it...")
+        try:
+            server.app.run()  # sin host ni port
+            # Si run() termina inmediatamente, mantenemos el proceso vivo
+            print("⚠️ FastMCP.run() finished immediately, holding process alive...")
+            while True:
+                time.sleep(60)
+        except Exception:
+            print("❌ Error running FastMCP.run():")
+            traceback.print_exc()
+            print("⚠️ Holding process alive to prevent Render from exiting...")
+            while True:
+                time.sleep(60)
     else:
-        print("⚠️ FastMCP has no run() method — holding process alive...")
+        print("⚠️ No run() method — holding process alive...")
         while True:
             time.sleep(60)
 
