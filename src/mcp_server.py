@@ -32,7 +32,8 @@ class MCPAlteryxServer:
         self.app = FastMCP(
             name="mcp-alteryx-server",
            #  settings=settings,
-            prompt="""
+           #  prompt=
+            """
            
 # MCP Wrapper for Alteryx server
 
