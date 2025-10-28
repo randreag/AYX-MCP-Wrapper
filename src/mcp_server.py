@@ -22,16 +22,16 @@ class MCPAlteryxServer:
         self.tools = AYXMCPTools()
 
         # Initialize the setting for the FastMCP app
-        settings = {
-             "debug": True,
-             "log_level": "DEBUG",
-             "host": "0.0.0.0",
-             "port": 10000,
-        }
+         #settings = {
+           #   "debug": True,
+          #    "log_level": "DEBUG",
+           #   "host": "0.0.0.0",
+           #   "port": 10000,
+        #}
         # Initialize the FastMCP app
         self.app = FastMCP(
             name="mcp-alteryx-server",
-            settings=settings,
+           #  settings=settings,
             prompt="""
            
 # MCP Wrapper for Alteryx server
