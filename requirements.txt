@@ -6,3 +6,4 @@ fastmcp
 uvicorn
 gunicorn
 flask
+six>=1.16.0
