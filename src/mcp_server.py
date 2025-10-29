@@ -5,7 +5,8 @@ from typing import List, Optional, Dict, Any
 import time
 import os
 import traceback
-
+from fastapi import FastAPI
+import uvicorn
 
 class MCPAlteryxServer:
     def __init__(self):
@@ -279,24 +280,23 @@ class MCPAlteryxServer:
         return self
         
 
-import os
-import time
-
 if __name__ == "__main__":
     server = MCPAlteryxServer()
     server.initialize()
 
-    try:
-        if hasattr(server.app, "run"):
-            # Render asigna el puerto automáticamente a través de la variable PORT
-            port = int(os.environ.get("PORT", 10000))
-            server.app.run(host="0.0.0.0", port=port)
-        else:
-            print("⚠️ FastMCP app has no run() method, holding process...")
-            while True:
-                time.sleep(60)
-    except Exception:
-        import traceback
-        traceback.print_exc()
-        while True:
-            time.sleep(60)
+    # Inicia FastMCP en segundo plano (si tiene .run)
+    if hasattr(server.app, "run"):
+        import threading
+        threading.Thread(target=server.app.run, daemon=True).start()
+
+    # Crea un endpoint mínimo solo para mantener el puerto abierto
+    app = FastAPI()
+
+    @app.get("/")
+    def healthcheck():
+        return {"status": "ok", "service": "mcp-alteryx-server"}
+
+    port = int(os.environ.get("PORT", 10000))
+    print(f"🚀 Starting healthcheck server on port {port}")
+    uvicorn.run(app, host="0.0.0.0", port=port)
+
