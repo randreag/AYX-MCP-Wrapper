@@ -279,18 +279,22 @@ class MCPAlteryxServer:
         return self
         
 
+import os
+import time
+
 if __name__ == "__main__":
     server = MCPAlteryxServer()
     server.initialize()
 
     try:
         if hasattr(server.app, "run"):
-            # Ejecuta run() sin print después
-            server.app.run()
-        # Si run() termina inmediatamente, mantenemos el proceso vivo
-        while True:
-            time.sleep(60)
-
+            # Render asigna el puerto automáticamente a través de la variable PORT
+            port = int(os.environ.get("PORT", 10000))
+            server.app.run(host="0.0.0.0", port=port)
+        else:
+            print("⚠️ FastMCP app has no run() method, holding process...")
+            while True:
+                time.sleep(60)
     except Exception:
         import traceback
         traceback.print_exc()
