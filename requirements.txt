@@ -8,4 +8,4 @@ gunicorn
 flask
 six>=1.16.0
 mcp
-mcp-server-alteryx
+git+https://github.com/alteryx/mcp-server-alteryx.git
