@@ -43,12 +43,14 @@ class MCPAlteryxServer:
             raise RuntimeError("Server not initialized. Call initialize() first.")
 
         # Register Collections tools
-        @self.app.tool()
+        #@self.app.tool()
+        @app.get("/get-all-collections")
         def get_all_collections():
             """Get the list of all collections of the Alteryx server"""
             return self.tools.get_all_collections()
 
-        @self.app.tool()
+        #@self.app.tool()
+        @app.get("/get_collection_by_id")
         def get_collection_by_id(collection_id: str):
             """Get a collection by its ID"""
             return self.tools.get_collection_by_id(collection_id)
