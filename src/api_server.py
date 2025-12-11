@@ -3,7 +3,7 @@ import threading
 import uvicorn
 from fastapi import FastAPI
 from mcp.server.fastmcp import FastMCP
-from src.tools import AYXMCPTools
+from tools import AYXMCPTools
 
 # ---------------------------
 #  MCP SERVER (WEBSOCKET)
