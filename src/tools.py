@@ -1,4 +1,4 @@
-import server_client as server_client
+import src.server_client as server_client
 from server_client.rest import ApiException
 from typing import List, Optional, Dict, Any
 import pprint
