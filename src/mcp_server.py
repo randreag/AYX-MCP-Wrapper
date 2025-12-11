@@ -283,18 +283,17 @@ class MCPAlteryxServer:
         
 
 if __name__ == "__main__":
-    # Initialize MCP server
+    # Initialize MCP-style server
     server = MCPAlteryxServer().initialize()
     server.register_tools()
 
-    # FastMCP automatically generates a FastAPI app inside server.app.fastapi_app
-    mcp_app = server.app.fastapi_app
+    # FastMCP: create the FastAPI app manually
+    mcp_app = server.app.create_fastapi_app()
 
     port = int(os.environ.get("PORT", 10000))
 
     print(f"🚀 Starting MCP WebSocket server on ws://0.0.0.0:{port}/mcp")
 
-    # Run only the MCP FastAPI app
-    import uvicorn
+    # Run the FastAPI app
     uvicorn.run(mcp_app, host="0.0.0.0", port=port)
 
