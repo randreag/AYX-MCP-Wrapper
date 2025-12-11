@@ -283,22 +283,18 @@ class MCPAlteryxServer:
         
 
 if __name__ == "__main__":
-    server = MCPAlteryxServer()
-    server.initialize()
+    # Initialize MCP server
+    server = MCPAlteryxServer().initialize()
+    server.register_tools()
 
-    # Inicia FastMCP en segundo plano (si tiene .run)
-    if hasattr(server.app, "run"):
-        import threading
-        threading.Thread(target=server.app.run, daemon=True).start()
-
-    # Crea un endpoint mínimo solo para mantener el puerto abierto
-    app = FastAPI()
-
-    @app.get("/")
-    def healthcheck():
-        return {"status": "ok", "service": "mcp-alteryx-server"}
+    # FastMCP automatically generates a FastAPI app inside server.app.fastapi_app
+    mcp_app = server.app.fastapi_app
 
     port = int(os.environ.get("PORT", 10000))
-    print(f"🚀 Starting healthcheck server on port {port}")
-    uvicorn.run(app, host="0.0.0.0", port=port)
+
+    print(f"🚀 Starting MCP WebSocket server on ws://0.0.0.0:{port}/mcp")
+
+    # Run only the MCP FastAPI app
+    import uvicorn
+    uvicorn.run(mcp_app, host="0.0.0.0", port=port)
 
