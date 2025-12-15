@@ -10,4 +10,4 @@ def get_all_collections():
     return tools.get_all_collections()
 
 if __name__ == "__main__":
-    mcp_app.run())
+    mcp_app.run()
