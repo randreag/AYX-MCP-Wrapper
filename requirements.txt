@@ -1,10 +1,10 @@
-mcp>=0.4.0
+mcp==0.4.1
+fastapi==0.110.0
+uvicorn==0.29.0
 requests
 xmltodict
 python-dotenv
-fastapi
 fastmcp
-uvicorn
 gunicorn
 flask
 six>=1.16.0
