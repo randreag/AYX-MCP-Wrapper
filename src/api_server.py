@@ -1,18 +1,24 @@
-import time
+import os
+import uvicorn
+from fastapi import FastAPI
 from mcp.server.fastmcp import FastMCP
 from src.tools import AYXMCPTools
 
-mcp_app = FastMCP(name="mcp-alteryx-server")
+# FastAPI app (lo que Render expone)
+app = FastAPI()
+
+# MCP app
+mcp = FastMCP(name="mcp-alteryx-server")
 tools = AYXMCPTools()
 
-@mcp_app.tool()
+@mcp.tool()
 def get_all_collections():
     """Get all collections from the Alteryx server"""
     return tools.get_all_collections()
 
-if __name__ == "__main__":
-    mcp_app.run()
+# 🔗 Montar MCP dentro de FastAPI
+app.mount("/", mcp.app)
 
-    # ⬇️ Mantiene vivo el proceso (CLAVE para Render)
-    while True:
-        time.sleep(3600)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
