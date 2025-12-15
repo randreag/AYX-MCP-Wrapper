@@ -1,3 +1,4 @@
+mcp>=0.4.0
 requests
 xmltodict
 python-dotenv
@@ -7,4 +8,4 @@ uvicorn
 gunicorn
 flask
 six>=1.16.0
-mcp>=0.4.0
+
