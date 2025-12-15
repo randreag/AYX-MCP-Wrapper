@@ -1,4 +1,3 @@
-import os
 from mcp.server.fastmcp import FastMCP
 from src.tools import AYXMCPTools
 
@@ -11,5 +10,4 @@ def get_all_collections():
     return tools.get_all_collections()
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    mcp_app.run(host="0.0.0.0", port=port)
+    mcp_app.run())
