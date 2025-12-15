@@ -1,3 +1,4 @@
+import time
 from mcp.server.fastmcp import FastMCP
 from src.tools import AYXMCPTools
 
@@ -11,3 +12,7 @@ def get_all_collections():
 
 if __name__ == "__main__":
     mcp_app.run()
+
+    # ⬇️ Mantiene vivo el proceso (CLAVE para Render)
+    while True:
+        time.sleep(3600)
