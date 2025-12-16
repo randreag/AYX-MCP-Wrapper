@@ -20,6 +20,23 @@ ACTION_REGISTRY = {
     # =========================
     # COLLECTIONS
     # =========================
+
+    "get_all_collections": {
+        "method": "get_all_collections",
+        "required_params": []
+    },
+    "get_collection_by_id": {
+        "method": "get_collection_by_id",
+        "required_params": ["collection_id"]
+    },
+    "get_all_workflows": {
+        "method": "get_all_workflows",
+        "required_params": []
+    },
+    "get_workflow_by_id": {
+        "method": "get_workflow_by_id",
+        "required_params": ["workflow_id"]
+    }
     "create_collection": {
         "method": "create_collection",
         "required_params": ["name"]
