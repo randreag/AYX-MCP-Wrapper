@@ -36,7 +36,7 @@ ACTION_REGISTRY = {
     "get_workflow_by_id": {
         "method": "get_workflow_by_id",
         "required_params": ["workflow_id"]
-    }
+    },
     "create_collection": {
         "method": "create_collection",
         "required_params": ["name"]
