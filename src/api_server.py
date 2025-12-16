@@ -4,37 +4,16 @@ from pydantic import BaseModel
 from typing import Dict, Any
 
 from src.tools import AYXMCPTools
+# =========================
+# INIT
+# =========================
 
-# -------------------------------------------------
-# App init
-# -------------------------------------------------
-
-app = FastAPI(
-    title="Alteryx Tool Dispatcher API",
-    version="1.0.0"
-)
-
+app = FastAPI(title="Alteryx AI API")
 tools = AYXMCPTools()
 
-# -------------------------------------------------
-# Models
-# -------------------------------------------------
-
-class ToolRequest(BaseModel):
-    action: str
-    params: Dict[str, Any] = {}
-
-# -------------------------------------------------
-# Health check (Render needs this)
-# -------------------------------------------------
-
-@app.get("/")
-def health():
-    return {
-        "status": "ok",
-        "service": "alteryx-tool-dispatcher"
-    }
-
+# =========================
+# ACTION REGISTRY
+# =========================
 
 ACTION_REGISTRY = {
 
@@ -231,46 +210,74 @@ ACTION_REGISTRY = {
     }
 }
 
-# -------------------------------------------------
-# Tool dispatcher (USED BY n8n / LLM)
-# -------------------------------------------------
 
-@app.post("/tool")
-def tool_dispatcher(req: ToolRequest):
 
-    action = req.action
-    params = req.params or {}
+# =========================
+# MODELS
+# =========================
 
-    if action not in ACTION_REGISTRY:
+class InvokeRequest(BaseModel):
+    action: str
+    params: Dict[str, Any] = {}
+
+
+# =========================
+# ROUTES
+# =========================
+
+@app.get("/")
+def health():
+    return {"status": "ok"}
+
+
+@app.get("/actions")
+def list_actions():
+    """
+    Allows the LLM (and you) to see all available actions
+    """
+    return {
+        action: {
+            "required_params": data["required_params"]
+        }
+        for action, data in ACTION_REGISTRY.items()
+    }
+
+
+@app.post("/invoke")
+def invoke(req: InvokeRequest):
+    """
+    Single endpoint to execute ANY action
+    """
+
+    if req.action not in ACTION_REGISTRY:
         raise HTTPException(
             status_code=400,
-            detail=f"Unknown action: {action}"
+            detail=f"Unknown action: {req.action}"
         )
 
-    action_def = ACTION_REGISTRY[action]
+    action_def = ACTION_REGISTRY[req.action]
+    method_name = action_def["method"]
+    required_params = action_def["required_params"]
 
-    # Validate required params
-    missing = [
-        p for p in action_def["required_params"]
-        if p not in params
-    ]
+    # validate params
+    missing = [p for p in required_params if p not in req.params]
     if missing:
         raise HTTPException(
             status_code=400,
             detail=f"Missing params: {missing}"
         )
 
-    # Call method dynamically
-    method_name = action_def["method"]
-    method = getattr(tools, method_name)
-
+    # dynamic dispatch
     try:
-        return method(**params)
+        method = getattr(tools, method_name)
+        return method(**req.params)
     except Exception as e:
         raise HTTPException(
             status_code=500,
             detail=str(e)
         )
+
+
 
 # -------------------------------------------------
 # Run server (Render)
